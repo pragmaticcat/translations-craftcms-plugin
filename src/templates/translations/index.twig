@@ -1,0 +1,156 @@
+{% extends "_layouts/cp" %}
+
+{% set title = "Translations" %}
+{% set selectedSubnavItem = "translations" %}
+
+{% block content %}
+  <div class="flex justify-between align-center">
+    <h1>Translations</h1>
+    <div class="btngroup">
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'csv' }) }}">Export CSV</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'json' }) }}">Export JSON</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'php' }) }}">Export PHP</a>
+    </div>
+  </div>
+
+  <div class="flex" style="margin-top: 16px; gap: 16px; align-items: flex-end;">
+    <form method="get" class="flex" style="gap: 12px; align-items: flex-end;">
+      <div>
+        <label for="q">Search</label>
+        <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="Key or description">
+      </div>
+      <div>
+        <label for="group">Group</label>
+        <div class="select">
+          <select id="group" name="group">
+            <option value="">All</option>
+            {% for groupName in groups %}
+              <option value="{{ groupName }}" {{ groupName == group ? 'selected' : '' }}>{{ groupName }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <button class="btn" type="submit">Filter</button>
+      <a class="btn" href="{{ url('pragmatic-translations') }}">Reset</a>
+    </form>
+
+    <form method="post" enctype="multipart/form-data" accept-charset="UTF-8" style="margin-left: auto;">
+      {{ csrfInput() }}
+      {{ actionInput('pragmatic-translations/translations/import') }}
+      {{ redirectInput('pragmatic-translations') }}
+      <div class="flex" style="gap: 8px; align-items: flex-end;">
+        <div>
+          <label for="format">Import</label>
+          <div class="select">
+            <select id="format" name="format">
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+              <option value="php">PHP (ZIP)</option>
+            </select>
+          </div>
+        </div>
+        <input type="file" name="file" required>
+        <button class="btn" type="submit">Upload</button>
+      </div>
+    </form>
+  </div>
+
+  <form method="post" accept-charset="UTF-8">
+    {{ csrfInput() }}
+    {{ actionInput('pragmatic-translations/translations/save') }}
+    {{ redirectInput('pragmatic-translations') }}
+
+    <table class="data fullwidth" id="translations-table" style="margin-top: 16px;">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Group</th>
+          <th>Description</th>
+          {% for site in sites %}
+            <th>{{ site.handle }}</th>
+          {% endfor %}
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for translation in translations %}
+          <tr>
+            <td>
+              <input type="hidden" name="translations[{{ loop.index0 }}][id]" value="{{ translation.id }}">
+              <input class="text fullwidth" name="translations[{{ loop.index0 }}][key]" value="{{ translation.key }}" required>
+            </td>
+            <td>
+              <input class="text fullwidth" name="translations[{{ loop.index0 }}][group]" value="{{ translation.group }}">
+            </td>
+            <td>
+              <input class="text fullwidth" name="translations[{{ loop.index0 }}][description]" value="{{ translation.description }}">
+            </td>
+            {% for site in sites %}
+              <td>
+                <input class="text fullwidth" name="translations[{{ loop.parent.loop.index0 }}][values][{{ site.id }}]" value="{{ translation.values[site.id] ?? '' }}">
+              </td>
+            {% endfor %}
+            <td>
+              <label class="checkbox">
+                <input type="checkbox" name="translations[{{ loop.index0 }}][delete]" value="1">
+                <span></span>
+              </label>
+            </td>
+          </tr>
+        {% endfor %}
+
+        {% set newIndex = translations|length %}
+        <tr data-new-row="1">
+          <td>
+            <input class="text fullwidth" name="translations[{{ newIndex }}][key]" placeholder="New key">
+          </td>
+          <td>
+            <input class="text fullwidth" name="translations[{{ newIndex }}][group]" placeholder="Optional group">
+          </td>
+          <td>
+            <input class="text fullwidth" name="translations[{{ newIndex }}][description]" placeholder="Optional description">
+          </td>
+          {% for site in sites %}
+            <td>
+              <input class="text fullwidth" name="translations[{{ newIndex }}][values][{{ site.id }}]" placeholder="">
+            </td>
+          {% endfor %}
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="buttons" style="margin-top: 12px;">
+      <button class="btn" id="add-row" type="button">Add Row</button>
+      <button class="btn submit" type="submit">Save</button>
+    </div>
+  </form>
+
+  {% js %}
+    (function() {
+      const table = document.getElementById('translations-table');
+      const addButton = document.getElementById('add-row');
+      if (!table || !addButton) return;
+
+      addButton.addEventListener('click', function() {
+        const body = table.querySelector('tbody');
+        const template = body.querySelector('tr[data-new-row="1"]');
+        if (!template) return;
+
+        const newIndex = body.querySelectorAll('tr').length;
+        const clone = template.cloneNode(true);
+        clone.removeAttribute('data-new-row');
+
+        clone.querySelectorAll('input').forEach(function(input) {
+          const name = input.getAttribute('name');
+          if (name) {
+            input.setAttribute('name', name.replace(/translations\[\d+\]/, 'translations[' + newIndex + ']'));
+          }
+          input.value = '';
+        });
+
+        body.appendChild(clone);
+      });
+    })();
+  {% endjs %}
+{% endblock %}
