@@ -44,7 +44,9 @@
       return;
     }
 
-    var input = fieldEl.querySelector('input[type="text"][name^="fields["]');
+    var input = fieldEl.querySelector('input[type="text"][name^="fields["]')
+      || fieldEl.querySelector('input[type="text"][name$="[title]"]')
+      || fieldEl.querySelector('input#title');
     if (input) {
       input.value = value;
       input.dispatchEvent(new Event('input', { bubbles: true }));

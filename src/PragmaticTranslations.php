@@ -9,6 +9,7 @@ use craft\events\RegisterUserPermissionsEvent;
 use craft\fields\PlainText;
 use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\CustomField;
+use craft\fieldlayoutelements\TitleField;
 use craft\services\UserPermissions;
 use craft\web\View;
 use craft\web\UrlManager;
@@ -164,6 +165,54 @@ JS,
                                 $containerId,
                                 $element->id,
                                 $field->handle,
+                            ]
+                        );
+
+                        $event->items[] = [
+                            'id' => $itemId,
+                            'icon' => 'language',
+                            'label' => Craft::t('pragmatic-translations', 'Translate from site…'),
+                        ];
+                    }
+                );
+
+                // Add "Translate from site…" to Title field action menu
+                Event::on(
+                    TitleField::class,
+                    BaseField::EVENT_DEFINE_ACTION_MENU_ITEMS,
+                    function (\craft\events\DefineFieldActionsEvent $event) {
+                        if ($event->static) {
+                            return;
+                        }
+
+                        $element = $event->element;
+                        if (!$element || !$element->id) {
+                            return;
+                        }
+
+                        // Need at least 2 sites
+                        if (count(Craft::$app->getSites()->getAllSites()) < 2) {
+                            return;
+                        }
+
+                        $view = Craft::$app->getView();
+                        $itemId = sprintf('action-pt-autotranslate-%s', mt_rand());
+                        $containerId = $view->namespaceInputId('title') . '-field';
+
+                        $view->registerJsWithVars(
+                            fn($btnId, $cId, $eId, $fHandle) => <<<JS
+$('#' + $btnId).on('activate', function() {
+    var container = document.getElementById($cId);
+    if (window.PragmaticTranslations && window.PragmaticTranslations.openModal) {
+        window.PragmaticTranslations.openModal(container, $eId, $fHandle);
+    }
+});
+JS,
+                            [
+                                $view->namespaceInputId($itemId),
+                                $containerId,
+                                $element->id,
+                                'title',
                             ]
                         );
 

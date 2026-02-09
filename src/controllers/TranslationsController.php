@@ -334,15 +334,20 @@ class TranslationsController extends Controller
             return $this->asJson(['success' => false, 'error' => 'Missing required parameters.']);
         }
 
-        $field = Craft::$app->getFields()->getFieldByHandle($fieldHandle);
-        if (!$field) {
-            return $this->asJson(['success' => false, 'error' => 'Field not found.']);
-        }
+        $isTitle = $fieldHandle === 'title';
+        $isCkeditor = false;
 
-        $isPlainText = $field instanceof PlainText;
-        $isCkeditor = class_exists(\craft\ckeditor\Field::class) && $field instanceof \craft\ckeditor\Field;
-        if (!$isPlainText && !$isCkeditor) {
-            return $this->asJson(['success' => false, 'error' => 'Field type not supported.']);
+        if (!$isTitle) {
+            $field = Craft::$app->getFields()->getFieldByHandle($fieldHandle);
+            if (!$field) {
+                return $this->asJson(['success' => false, 'error' => 'Field not found.']);
+            }
+
+            $isPlainText = $field instanceof PlainText;
+            $isCkeditor = class_exists(\craft\ckeditor\Field::class) && $field instanceof \craft\ckeditor\Field;
+            if (!$isPlainText && !$isCkeditor) {
+                return $this->asJson(['success' => false, 'error' => 'Field type not supported.']);
+            }
         }
 
         $entry = Craft::$app->getElements()->getElementById($entryId, null, $sourceSiteId);
@@ -356,8 +361,7 @@ class TranslationsController extends Controller
             return $this->asJson(['success' => false, 'error' => 'Invalid site selection.']);
         }
 
-        $value = $entry->getFieldValue($fieldHandle);
-        $text = (string)$value;
+        $text = $isTitle ? (string)$entry->title : (string)$entry->getFieldValue($fieldHandle);
         if (trim($text) === '') {
             return $this->asJson(['success' => false, 'error' => 'Source field is empty.']);
         }
