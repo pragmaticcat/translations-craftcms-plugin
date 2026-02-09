@@ -103,7 +103,7 @@ class PragmaticTranslations extends Plugin
         }
     }
 
-    protected function createSettingsModel(): ?\\craft\\base\\Model
+    protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
     }
