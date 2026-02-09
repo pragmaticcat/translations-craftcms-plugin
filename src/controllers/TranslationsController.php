@@ -27,6 +27,11 @@ class TranslationsController extends Controller
 
     public function actionIndex(): Response
     {
+        return $this->redirect('pragmatic-translations/entries');
+    }
+
+    public function actionEntries(): Response
+    {
         $sites = Craft::$app->getSites()->getAllSites();
         $languages = $this->getLanguages($sites);
         $request = Craft::$app->getRequest();
@@ -48,7 +53,7 @@ class TranslationsController extends Controller
             $page = $totalPages;
         }
 
-        return $this->renderTemplate('pragmatic-translations/translations/index', [
+        return $this->renderTemplate('pragmatic-translations/entries', [
             'sites' => $sites,
             'languages' => $languages,
             'translations' => $translations,
@@ -59,6 +64,60 @@ class TranslationsController extends Controller
             'perPage' => $perPage,
             'totalPages' => $totalPages,
             'total' => $total,
+        ]);
+    }
+
+    public function actionImportExport(): Response
+    {
+        $request = Craft::$app->getRequest();
+        $search = (string)$request->getParam('q', '');
+        $group = (string)$request->getParam('group', 'site');
+        $perPage = (int)$request->getParam('perPage', 50);
+        if (!in_array($perPage, [50, 100, 250], true)) {
+            $perPage = 50;
+        }
+
+        return $this->renderTemplate('pragmatic-translations/import-export', [
+            'search' => $search,
+            'group' => $group,
+            'perPage' => $perPage,
+        ]);
+    }
+
+    public function actionGroups(): Response
+    {
+        $service = PragmaticTranslations::$plugin->translations;
+        $groups = $service->getGroups();
+        $request = Craft::$app->getRequest();
+        $search = (string)$request->getParam('q', '');
+        $group = (string)$request->getParam('group', 'site');
+        $perPage = (int)$request->getParam('perPage', 50);
+        if (!in_array($perPage, [50, 100, 250], true)) {
+            $perPage = 50;
+        }
+
+        return $this->renderTemplate('pragmatic-translations/groups', [
+            'groups' => $groups,
+            'search' => $search,
+            'group' => $group,
+            'perPage' => $perPage,
+        ]);
+    }
+
+    public function actionOptions(): Response
+    {
+        $request = Craft::$app->getRequest();
+        $search = (string)$request->getParam('q', '');
+        $group = (string)$request->getParam('group', 'site');
+        $perPage = (int)$request->getParam('perPage', 50);
+        if (!in_array($perPage, [50, 100, 250], true)) {
+            $perPage = 50;
+        }
+
+        return $this->renderTemplate('pragmatic-translations/options', [
+            'search' => $search,
+            'group' => $group,
+            'perPage' => $perPage,
         ]);
     }
 

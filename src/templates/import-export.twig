@@ -1,0 +1,38 @@
+{% extends "pragmatic-translations/_layout" %}
+
+{% set title = "Importar/exportar" %}
+{% set activeSection = "import-export" %}
+
+{% block main %}
+  <div class="flex justify-between align-center">
+    <h1>Importar/exportar</h1>
+  </div>
+
+  <div class="flex" style="margin-top: 12px; gap: 16px; align-items: flex-end;">
+    <div class="btngroup">
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'csv' }) }}">Export CSV</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'json' }) }}">Export JSON</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'php' }) }}">Export PHP</a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" accept-charset="UTF-8" style="margin-left: auto;">
+      {{ csrfInput() }}
+      {{ actionInput('pragmatic-translations/translations/import') }}
+      {{ redirectInput('pragmatic-translations/import-export', { group: group, q: search, perPage: perPage }) }}
+      <div class="flex" style="gap: 8px; align-items: flex-end;">
+        <div>
+          <label for="format">Import</label>
+          <div class="select">
+            <select id="format" name="format">
+              <option value="csv">CSV</option>
+              <option value="json">JSON</option>
+              <option value="php">PHP (ZIP)</option>
+            </select>
+          </div>
+        </div>
+        <input type="file" name="file" required>
+        <button class="btn" type="submit">Upload</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

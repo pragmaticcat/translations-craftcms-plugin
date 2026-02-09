@@ -37,6 +37,10 @@ class PragmaticTranslations extends Plugin
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['pragmatic-translations'] = 'pragmatic-translations/translations/index';
+                $event->rules['pragmatic-translations/entries'] = 'pragmatic-translations/translations/entries';
+                $event->rules['pragmatic-translations/import-export'] = 'pragmatic-translations/translations/import-export';
+                $event->rules['pragmatic-translations/groups'] = 'pragmatic-translations/translations/groups';
+                $event->rules['pragmatic-translations/options'] = 'pragmatic-translations/translations/options';
                 $event->rules['pragmatic-translations/save'] = 'pragmatic-translations/translations/save';
                 $event->rules['pragmatic-translations/export'] = 'pragmatic-translations/translations/export';
                 $event->rules['pragmatic-translations/import'] = 'pragmatic-translations/translations/import';
