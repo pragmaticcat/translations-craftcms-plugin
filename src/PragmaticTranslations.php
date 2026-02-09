@@ -6,6 +6,9 @@ use Craft;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
+use craft\fields\PlainText;
+use craft\fieldlayoutelements\BaseField;
+use craft\fieldlayoutelements\CustomField;
 use craft\services\UserPermissions;
 use craft\web\View;
 use craft\web\UrlManager;
@@ -83,7 +86,6 @@ class PragmaticTranslations extends Plugin
 
         if (Craft::$app->getRequest()->getIsCpRequest()) {
             $view = Craft::$app->getView();
-            $view->registerAssetBundle(AutotranslateAsset::class);
 
             $sites = Craft::$app->getSites()->getAllSites();
             $siteData = array_map(static function($site) {
@@ -95,11 +97,84 @@ class PragmaticTranslations extends Plugin
                 ];
             }, $sites);
 
+            // Register config at POS_HEAD so it's available before asset bundle JS runs
             $view->registerJs('window.PragmaticTranslations = ' . json_encode([
                 'sites' => $siteData,
                 'currentSiteId' => Craft::$app->getSites()->getCurrentSite()->id,
                 'autotranslateUrl' => UrlHelper::actionUrl('pragmatic-translations/translations/autotranslate'),
-            ]) . ';');
+            ]) . ';', View::POS_HEAD);
+
+            $view->registerAssetBundle(AutotranslateAsset::class);
+
+            // Add "Translate from site…" to field action menus (Craft 5.9+)
+            if (class_exists(\craft\events\DefineFieldActionsEvent::class)) {
+                Event::on(
+                    CustomField::class,
+                    BaseField::EVENT_DEFINE_ACTION_MENU_ITEMS,
+                    function (\craft\events\DefineFieldActionsEvent $event) {
+                        if ($event->static) {
+                            return;
+                        }
+
+                        $element = $event->element;
+                        if (!$element || !$element->id) {
+                            return;
+                        }
+
+                        /** @var CustomField $sender */
+                        $sender = $event->sender;
+                        try {
+                            $field = $sender->getField();
+                        } catch (\Exception $e) {
+                            return;
+                        }
+
+                        // Only PlainText and CKEditor fields
+                        $isEligible = ($field instanceof PlainText)
+                            || get_class($field) === 'craft\\ckeditor\\Field';
+                        if (!$isEligible) {
+                            return;
+                        }
+
+                        // Only translatable fields (different value per site)
+                        if ($field->translationMethod === \craft\base\Field::TRANSLATION_METHOD_NONE) {
+                            return;
+                        }
+
+                        // Need at least 2 sites
+                        if (count(Craft::$app->getSites()->getAllSites()) < 2) {
+                            return;
+                        }
+
+                        $view = Craft::$app->getView();
+                        $itemId = sprintf('action-pt-autotranslate-%s', mt_rand());
+                        $containerId = $view->namespaceInputId($field->handle) . '-field';
+
+                        $view->registerJsWithVars(
+                            fn($btnId, $cId, $eId, $fHandle) => <<<JS
+$('#' + $btnId).on('activate', function() {
+    var container = document.getElementById($cId);
+    if (window.PragmaticTranslations && window.PragmaticTranslations.openModal) {
+        window.PragmaticTranslations.openModal(container, $eId, $fHandle);
+    }
+});
+JS,
+                            [
+                                $view->namespaceInputId($itemId),
+                                $containerId,
+                                $element->id,
+                                $field->handle,
+                            ]
+                        );
+
+                        $event->items[] = [
+                            'id' => $itemId,
+                            'icon' => 'language',
+                            'label' => Craft::t('pragmatic-translations', 'Translate from site…'),
+                        ];
+                    }
+                );
+            }
         }
     }
 
