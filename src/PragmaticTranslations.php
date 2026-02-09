@@ -98,11 +98,18 @@ class PragmaticTranslations extends Plugin
                 ];
             }, $sites);
 
+            // Check if Google Translate is configured
+            $settings = $this->getSettings();
+            $apiKey = \craft\helpers\App::env($settings->googleApiKeyEnv);
+            $googleConfigured = trim($settings->googleProjectId) !== '' && !empty($apiKey);
+
             // Register config at POS_HEAD so it's available before asset bundle JS runs
             $view->registerJs('window.PragmaticTranslations = ' . json_encode([
                 'sites' => $siteData,
                 'currentSiteId' => Craft::$app->getSites()->getCurrentSite()->id,
                 'autotranslateUrl' => UrlHelper::actionUrl('pragmatic-translations/translations/autotranslate'),
+                'googleTranslateConfigured' => $googleConfigured,
+                'readmeUrl' => $this->getReadmeUrl(),
             ]) . ';', View::POS_HEAD);
 
             $view->registerAssetBundle(AutotranslateAsset::class);
@@ -232,6 +239,19 @@ JS,
         return new Settings();
     }
 
+
+    private function getReadmeUrl(): string
+    {
+        $composerPath = $this->getBasePath() . '/../composer.json';
+        if (file_exists($composerPath)) {
+            $data = json_decode(file_get_contents($composerPath), true);
+            $docUrl = $data['extra']['documentationUrl'] ?? '';
+            if ($docUrl !== '') {
+                return $docUrl . '#autotranslate-google-translate-v3';
+            }
+        }
+        return '';
+    }
 
     public function getCpNavItem(): array
     {

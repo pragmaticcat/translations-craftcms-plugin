@@ -55,6 +55,31 @@
   }
 
   config.openModal = function(fieldEl, entryId, fieldHandle) {
+    // Check if Google Translate is configured
+    if (!config.googleTranslateConfigured) {
+      var modal = document.createElement('div');
+      modal.className = 'modal fitted';
+      modal.innerHTML =
+        '<div class="body">' +
+          '<h2>' + t('Google Translate not configured') + '</h2>' +
+          '<p>' + t('To use autotranslate, you need to configure the Google Translate API key and project ID.') + '</p>' +
+          '<p><a href="' + config.readmeUrl + '" target="_blank" class="go">' + t('View setup instructions') + '</a></p>' +
+          '<div class="buttons" style="margin-top:12px;">' +
+            '<button class="btn submit" type="button" id="pt-close-config">' + t('Close') + '</button>' +
+          '</div>' +
+        '</div>';
+
+      var garnModal = new Garnish.Modal(modal, {
+        autoShow: true,
+        closeOtherModals: true,
+        onHide: function() { garnModal.destroy(); }
+      });
+      modal.querySelector('#pt-close-config').addEventListener('click', function() {
+        garnModal.hide();
+      });
+      return;
+    }
+
     var currentSiteId = config.currentSiteId;
     var sites = config.sites.filter(function(site) { return site.id !== currentSiteId; });
     if (!sites.length) {
