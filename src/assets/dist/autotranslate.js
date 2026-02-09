@@ -182,16 +182,52 @@
     });
   }
 
-  document.addEventListener('click', function(ev) {
-    const btn = ev.target.closest('.menubtn');
-    if (!btn) return;
+  function addInlineButton(fieldEl) {
+    if (!fieldEl || fieldEl.getAttribute('data-pt-autotranslate') === '1') return;
+    if (!isEligibleField(fieldEl)) return;
 
-    const fieldEl = btn.closest('.field');
-    if (!fieldEl || !isEligibleField(fieldEl)) return;
+    const heading = fieldEl.querySelector('.heading');
+    if (!heading) return;
 
-    Promise.resolve(waitForMenu(btn, fieldEl, 6)).then(function(menuEl) {
-      if (!menuEl) return;
-      ensureMenuItem(fieldEl, menuEl);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn small';
+    button.textContent = 'Autotranslate from...';
+    button.style.marginRight = '8px';
+
+    button.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      openAutotranslateModal(fieldEl);
     });
+
+    const menuBtn = heading.querySelector('.menubtn');
+    if (menuBtn && menuBtn.parentElement) {
+      menuBtn.parentElement.insertBefore(button, menuBtn);
+    } else {
+      heading.appendChild(button);
+    }
+
+    fieldEl.setAttribute('data-pt-autotranslate', '1');
+  }
+
+  function scanFields() {
+    document.querySelectorAll('.field').forEach(addInlineButton);
+  }
+
+  scanFields();
+
+  const observer = new MutationObserver(function(mutations) {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach(function(node) {
+        if (!(node instanceof Element)) return;
+        if (node.classList.contains('field')) {
+          addInlineButton(node);
+          return;
+        }
+        node.querySelectorAll && node.querySelectorAll('.field').forEach(addInlineButton);
+      });
+    }
   });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
