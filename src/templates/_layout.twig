@@ -3,80 +3,17 @@
 {% set title = title ?? "Translations" %}
 {% set selectedSubnavItem = "translations" %}
 
+{% block sidebar %}
+  <nav aria-label="Pragmatic Translations">
+    <ul>
+      <li><a class="{{ activeSection == 'entries' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/entries') }}">Entradas</a></li>
+      <li><a class="{{ activeSection == 'import-export' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/import-export') }}">Importar/exportar</a></li>
+      <li><a class="{{ activeSection == 'groups' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/groups') }}">Grupos</a></li>
+      <li><a class="{{ activeSection == 'options' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/options') }}">Opciones</a></li>
+    </ul>
+  </nav>
+{% endblock %}
+
 {% block content %}
-  <div id="main-content" class="has-sidebar">
-    <div id="sidebar-container">
-      <div id="sidebar-toggle-container">
-        <button
-          type="button"
-          id="sidebar-toggle"
-          class="btn menubtn chromeless"
-          aria-controls="sidebar"
-          aria-expanded="true"
-        >
-          <span class="icon icon-mask" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" focusable="false" aria-hidden="true">
-              <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM416 416L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32z"/>
-            </svg>
-          </span>
-          <span class="label">Ocultar barra lateral</span>
-        </button>
-      </div>
-      <div id="sidebar" class="sidebar">
-        <nav aria-label="Pragmatic Translations">
-          <ul>
-            <li><a class="{{ activeSection == 'entries' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/entries', { group: group, q: search, perPage: perPage, page: page|default(1) }) }}">Entradas</a></li>
-            <li><a class="{{ activeSection == 'import-export' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/import-export', { group: group, q: search, perPage: perPage }) }}">Importar/exportar</a></li>
-            <li><a class="{{ activeSection == 'groups' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/groups', { group: group, q: search, perPage: perPage }) }}">Grupos</a></li>
-            <li><a class="{{ activeSection == 'options' ? 'sel' : '' }}" href="{{ url('pragmatic-translations/options', { group: group, q: search, perPage: perPage }) }}">Opciones</a></li>
-          </ul>
-        </nav>
-      </div>
-    </div>
-
-    <div id="content-container" tabindex="-1">
-      <div class="content-grid">
-        <div class="content-grid__main">
-          <div id="content" class="content-pane">
-            {% block main %}{% endblock %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {% js %}
-    (function() {
-      const sidebarContainer = document.getElementById('sidebar-container');
-      const sidebar = document.getElementById('sidebar');
-      const toggle = document.getElementById('sidebar-toggle');
-      if (!sidebarContainer || !sidebar || !toggle) return;
-
-      const applyState = function(collapsed) {
-        if (collapsed) {
-          sidebarContainer.classList.add('collapsed');
-          toggle.setAttribute('aria-expanded', 'false');
-          const label = toggle.querySelector('.label');
-          if (label) label.textContent = 'Mostrar barra lateral';
-        } else {
-          sidebarContainer.classList.remove('collapsed');
-          toggle.setAttribute('aria-expanded', 'true');
-          const label = toggle.querySelector('.label');
-          if (label) label.textContent = 'Ocultar barra lateral';
-        }
-      };
-
-      const saved = localStorage.getItem('ptSidebarCollapsed');
-      const prefersCollapsed = saved === '1';
-      const smallScreen = window.matchMedia && window.matchMedia('(max-width: 1200px)').matches;
-      applyState(prefersCollapsed || smallScreen);
-
-      toggle.addEventListener('click', function() {
-        const isCollapsed = sidebarContainer.classList.contains('collapsed');
-        const next = !isCollapsed;
-        applyState(next);
-        localStorage.setItem('ptSidebarCollapsed', next ? '1' : '0');
-      });
-    })();
-  {% endjs %}
+  {% block main %}{% endblock %}
 {% endblock %}
