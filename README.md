@@ -12,6 +12,7 @@ Craft CMS 5 plugin to manage static translations stored in the database, with a 
 - Import from CSV, JSON, and PHP (ZIP)
 - Twig helper: `craft.pragmaticTranslations.t()`
 - Twig filter override: `{{ 'hero.title'|t }}`
+- Auto-creates missing keys on first access
 
 ## Requirements
 - Craft CMS `^5.0`

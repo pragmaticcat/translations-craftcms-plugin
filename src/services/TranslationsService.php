@@ -12,7 +12,7 @@ class TranslationsService extends Component
 {
     private array $requestCache = [];
 
-    public function t(string $key, array $params = [], ?int $siteId = null, bool $fallbackToPrimary = true): string
+    public function t(string $key, array $params = [], ?int $siteId = null, bool $fallbackToPrimary = true, bool $createIfMissing = true): string
     {
         $siteId = $siteId ?? Craft::$app->getSites()->getCurrentSite()->id;
         $value = $this->getValue($key, $siteId);
@@ -22,6 +22,10 @@ class TranslationsService extends Component
             if ($primarySiteId !== $siteId) {
                 $value = $this->getValue($key, $primarySiteId);
             }
+        }
+
+        if ($value === null && $createIfMissing) {
+            $this->ensureKeyExists($key);
         }
 
         if ($value === null) {
@@ -188,7 +192,7 @@ class TranslationsService extends Component
         return $translations;
     }
 
-    public function getValueWithFallback(string $key, ?int $siteId = null, bool $fallbackToPrimary = true): ?string
+    public function getValueWithFallback(string $key, ?int $siteId = null, bool $fallbackToPrimary = true, bool $createIfMissing = true): ?string
     {
         $siteId = $siteId ?? Craft::$app->getSites()->getCurrentSite()->id;
         $value = $this->getValue($key, $siteId);
@@ -200,7 +204,34 @@ class TranslationsService extends Component
             }
         }
 
+        if ($value === null && $createIfMissing) {
+            $this->ensureKeyExists($key);
+        }
+
         return $value;
+    }
+
+    public function ensureKeyExists(string $key): void
+    {
+        $key = trim($key);
+        if ($key === '') {
+            return;
+        }
+
+        if (TranslationRecord::find()->where(['key' => $key])->exists()) {
+            return;
+        }
+
+        $record = new TranslationRecord();
+        $record->key = $key;
+        $record->group = null;
+        $record->description = null;
+
+        try {
+            $record->save(false);
+        } catch (\Throwable $e) {
+            // Ignore race conditions for duplicate keys
+        }
     }
 
     public function getGroups(): array

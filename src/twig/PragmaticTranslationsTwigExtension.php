@@ -45,11 +45,12 @@ class PragmaticTranslationsTwigExtension extends AbstractExtension
         $siteId = $this->resolveSiteId($language);
 
         $service = PragmaticTranslations::$plugin->translations;
-        $value = $service->getValueWithFallback($message, $siteId);
+        $value = $service->getValueWithFallback($message, $siteId, true, true);
         if ($value !== null) {
-            return $service->t($message, $params, $siteId, true);
+            return $service->t($message, $params, $siteId, true, true);
         }
 
+        $service->ensureKeyExists($message);
         return Craft::t($category, $message, $params, $language);
     }
 
