@@ -165,13 +165,32 @@
     const menuBtnEl = fieldEl.querySelector('.menubtn');
     if (!menuBtnEl || !window.Garnish || !window.Garnish.$) return;
 
-    const $btn = window.Garnish.$(menuBtnEl);
-    const menuBtn = $btn.data('menubtn') || $btn.data('menuBtn');
-    if (!menuBtn || !menuBtn.menu || typeof menuBtn.menu.addOptions !== 'function') return;
+    const getMenuBtn = function() {
+      const $btn = window.Garnish.$(menuBtnEl);
+      return $btn.data('menubtn') || $btn.data('menuBtn') || menuBtnEl.menuBtn || menuBtnEl._menuBtn;
+    };
 
-    const label = t('Translate from site…');
-    menuBtn.menu.addOptions([{ label, onClick: function() { openAutotranslateModal(fieldEl); } }]);
-    fieldEl.setAttribute('data-pt-autotranslate', '1');
+    const tryAdd = function() {
+      const menuBtn = getMenuBtn();
+      if (!menuBtn || !menuBtn.menu || typeof menuBtn.menu.addOptions !== 'function') return false;
+      const label = t('Translate from site…');
+      menuBtn.menu.addOptions([{ label, onClick: function() { openAutotranslateModal(fieldEl); } }]);
+      fieldEl.setAttribute('data-pt-autotranslate', '1');
+      return true;
+    };
+
+    if (tryAdd()) return;
+
+    menuBtnEl.addEventListener('click', function() {
+      let attempts = 6;
+      const poll = function() {
+        if (tryAdd()) return;
+        attempts -= 1;
+        if (attempts <= 0) return;
+        setTimeout(poll, 50);
+      };
+      poll();
+    }, { once: true });
   }
 
   function scanFields() {
