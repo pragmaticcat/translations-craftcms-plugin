@@ -369,7 +369,7 @@ class TranslationsController extends Controller
 
         try {
             $translated = $translate->translate($text, $sourceLang, $targetLang, $mimeType);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             return $this->asJson(['success' => false, 'error' => $e->getMessage()]);
         }
 
