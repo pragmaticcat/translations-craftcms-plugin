@@ -1,0 +1,14 @@
+{% extends "pragmatic-translations/_layout" %}
+
+{% set title = "Entradas"|t('pragmatic-translations') %}
+
+{% set selectedTab = 'groups' %}
+
+{% set crumbs = [
+    { label: "Translations"|t('pragmatic-translations'), url: url('pragmatic-translations') },
+    { label: "Entradas"|t('pragmatic-translations'), url: url('pragmatic-translations/groups') },
+] %}
+
+{% block content %}
+  <p class="light" style="margin-top: 12px;">No hay contenido en esta pestaña.</p>
+{% endblock %}

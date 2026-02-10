@@ -5,9 +5,9 @@
 {% set selectedTab = craft.app.request.getSegment(2) %}
 
 {% set tabs = {
-    'entries': { label: "Entradas", url: url('pragmatic-translations/entries') },
+    'entries': { label: "Estáticas", url: url('pragmatic-translations/entries') },
+    'groups': { label: "Entradas", url: url('pragmatic-translations/groups') },
     'import-export': { label: "Importar/exportar", url: url('pragmatic-translations/import-export') },
-    'groups': { label: "Grupos", url: url('pragmatic-translations/groups') },
     'options': { label: "Opciones", url: url('pragmatic-translations/options') },
 } %}
 

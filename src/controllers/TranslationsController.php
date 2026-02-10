@@ -54,7 +54,7 @@ class TranslationsController extends Controller
             $page = $totalPages;
         }
 
-        return $this->renderTemplate('pragmatic-translations/entries', [
+        return $this->renderTemplate('pragmatic-translations/estaticas', [
             'sites' => $sites,
             'languages' => $languages,
             'translations' => $translations,
@@ -97,7 +97,7 @@ class TranslationsController extends Controller
             $perPage = 50;
         }
 
-        return $this->renderTemplate('pragmatic-translations/groups', [
+        return $this->renderTemplate('pragmatic-translations/entradas', [
             'groups' => $groups,
             'search' => $search,
             'group' => $group,
