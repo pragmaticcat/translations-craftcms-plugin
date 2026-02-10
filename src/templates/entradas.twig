@@ -11,12 +11,11 @@
 {% block content %}
   {% css %}
     tr.entry-group-border > td { border-top: 2px solid #d1d5db; }
-    .at-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; opacity: 0.5; font-size: 14px; line-height: 1; }
-    .at-btn:hover { opacity: 1; }
-    .at-btn.loading { opacity: 0.3; pointer-events: none; }
-    .at-source-select { margin-left: 8px; }
+    .at-check-cell { width: 16px; text-align: center; }
+    .at-check-cell input[type="checkbox"] { margin: 0; }
+    #at-translate-selected:disabled { opacity: 0.5; cursor: not-allowed; }
   {% endcss %}
-  <div class="flex" style="margin-top: 12px; gap: 16px; align-items: flex-end;">
+  <div class="flex" style="margin-top: 12px; gap: 16px; align-items: flex-end; justify-content: space-between;">
     <form method="get" id="entries-filter" class="flex" style="gap: 12px; align-items: flex-end;">
       <input type="hidden" name="page" value="1">
       <div>
@@ -54,19 +53,10 @@
           </select>
         </div>
       </div>
-      {% if autotranslateAvailable %}
-        <div>
-          <label for="at-source-lang">Translate from</label>
-          <div class="select">
-            <select id="at-source-lang">
-              {% for language in languages %}
-                <option value="{{ language }}">{{ language }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      {% endif %}
     </form>
+    {% if autotranslateAvailable %}
+      <button type="button" id="at-translate-selected" class="btn submit" disabled>Translate selected</button>
+    {% endif %}
   </div>
 
   <form method="post" accept-charset="UTF-8">
@@ -83,7 +73,7 @@
             <th>
               {{ language }}
               {% if autotranslateAvailable %}
-                <button type="button" class="at-btn js-at-column" data-language="{{ language }}" title="Translate column to {{ language }}">&#127760;</button>
+                <input type="checkbox" class="js-at-col-check" data-language="{{ language }}" title="Select all {{ language }} cells">
               {% endif %}
             </th>
           {% endfor %}
@@ -102,7 +92,11 @@
                 <a href="#" class="js-entry-slideout" data-entry-id="{{ entryId }}">{{ row.entry.title|default('Entry #' ~ entryId) }}</a>
                 <div class="light">{{ row.entry.section.name ?? row.entry.type.name ?? 'No section or type' }}</div>
                 {% if autotranslateAvailable %}
-                  <button type="button" class="btn small js-at-entry" data-entry-id="{{ entryId }}" style="margin-top: 6px;" title="Translate all fields of this entry">Translate</button>
+                  <div style="margin-top: 6px;">
+                    <label class="light" style="font-size: 12px; cursor: pointer;">
+                      <input type="checkbox" class="js-at-entry-check" data-entry-id="{{ entryId }}"> Select all
+                    </label>
+                  </div>
                 {% endif %}
               </td>
             {% endif %}
@@ -114,10 +108,10 @@
             </td>
             {% for language in languages %}
               <td>
-                <div style="display: flex; align-items: center; gap: 2px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
                   <input class="text fullwidth js-at-input" name="entries[{{ rowIndex }}][values][{{ language }}]" value="{{ row.values[language] ?? '' }}" data-row-index="{{ rowIndex }}" data-language="{{ language }}">
                   {% if autotranslateAvailable %}
-                    <button type="button" class="at-btn js-at-cell" data-row-index="{{ rowIndex }}" data-language="{{ language }}" title="Translate this cell">&#127760;</button>
+                    <input type="checkbox" class="js-at-cell-check" data-row-index="{{ rowIndex }}" data-language="{{ language }}">
                   {% endif %}
                 </div>
               </td>
@@ -125,7 +119,7 @@
             <td style="white-space: nowrap;">
               <button class="btn submit" type="submit" name="saveRow" value="{{ rowIndex }}">Save</button>
               {% if autotranslateAvailable %}
-                <button type="button" class="btn small js-at-row" data-row-index="{{ rowIndex }}" title="Translate this row">&#127760;</button>
+                <input type="checkbox" class="js-at-row-check" data-row-index="{{ rowIndex }}" title="Select row" style="margin-left: 4px;">
               {% endif %}
             </td>
           </tr>
@@ -196,132 +190,191 @@
       /* ── Autotranslate logic ── */
       const autotranslateTextUrl = {{ autotranslateTextUrl|json_encode|raw }};
       const allLanguages = {{ languages|json_encode|raw }};
+      const translateBtn = document.getElementById('at-translate-selected');
 
-      function getSourceLang() {
-        const sel = document.getElementById('at-source-lang');
-        return sel ? sel.value : allLanguages[0];
+      /* ── Checkbox selection management ── */
+
+      function getCellChecks() {
+        return document.querySelectorAll('.js-at-cell-check');
       }
+
+      function getCheckedTargets() {
+        var targets = [];
+        getCellChecks().forEach(function(cb) {
+          if (cb.checked) {
+            targets.push({
+              rowIndex: cb.getAttribute('data-row-index'),
+              language: cb.getAttribute('data-language')
+            });
+          }
+        });
+        return targets;
+      }
+
+      function updateTranslateBtn() {
+        var hasChecked = false;
+        getCellChecks().forEach(function(cb) {
+          if (cb.checked) hasChecked = true;
+        });
+        translateBtn.disabled = !hasChecked;
+      }
+
+      // Cell checkboxes → update button
+      document.addEventListener('change', function(ev) {
+        if (ev.target.matches('.js-at-cell-check')) {
+          updateTranslateBtn();
+        }
+      });
+
+      // Row checkbox → toggle all cells in that row
+      document.querySelectorAll('.js-at-row-check').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var rowIndex = cb.getAttribute('data-row-index');
+          var checked = cb.checked;
+          document.querySelectorAll('.js-at-cell-check[data-row-index="' + rowIndex + '"]').forEach(function(cell) {
+            cell.checked = checked;
+          });
+          updateTranslateBtn();
+        });
+      });
+
+      // Column checkbox → toggle all cells in that column
+      document.querySelectorAll('.js-at-col-check').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var language = cb.getAttribute('data-language');
+          var checked = cb.checked;
+          document.querySelectorAll('.js-at-cell-check[data-language="' + language + '"]').forEach(function(cell) {
+            cell.checked = checked;
+          });
+          updateTranslateBtn();
+        });
+      });
+
+      // Entry checkbox → toggle all cells for that entry
+      document.querySelectorAll('.js-at-entry-check').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var entryId = cb.getAttribute('data-entry-id');
+          var checked = cb.checked;
+          document.querySelectorAll('tr[data-entry-id="' + entryId + '"]').forEach(function(tr) {
+            tr.querySelectorAll('.js-at-cell-check').forEach(function(cell) {
+              cell.checked = checked;
+            });
+            var rowCheck = tr.querySelector('.js-at-row-check');
+            if (rowCheck) rowCheck.checked = checked;
+          });
+          updateTranslateBtn();
+        });
+      });
+
+      /* ── Translation core ── */
 
       function getInput(rowIndex, language) {
         return document.querySelector('.js-at-input[data-row-index="' + rowIndex + '"][data-language="' + language + '"]');
       }
 
-      function setLoading(btns, loading) {
-        btns.forEach(function(btn) {
-          if (loading) btn.classList.add('loading');
-          else btn.classList.remove('loading');
-        });
-      }
-
-      /**
-       * Core translate function.
-       * targets: array of {rowIndex, language}
-       * triggerBtns: buttons to set loading state on
-       */
-      async function translateCells(targets, triggerBtns) {
-        const sourceLang = getSourceLang();
-        triggerBtns = triggerBtns || [];
-
+      async function translateCells(targets, sourceLang) {
         // Filter out targets where language === sourceLang
         targets = targets.filter(function(t) { return t.language !== sourceLang; });
         if (targets.length === 0) return;
 
         // Group by target language
-        const groups = {};
+        var groups = {};
         targets.forEach(function(t) {
           if (!groups[t.language]) groups[t.language] = [];
           groups[t.language].push(t);
         });
 
-        setLoading(triggerBtns, true);
+        var promises = Object.keys(groups).map(async function(targetLang) {
+          var group = groups[targetLang];
+          var texts = group.map(function(t) {
+            var srcInput = getInput(t.rowIndex, sourceLang);
+            return srcInput ? srcInput.value : '';
+          });
 
-        try {
-          const promises = Object.keys(groups).map(async function(targetLang) {
-            const group = groups[targetLang];
-            const texts = group.map(function(t) {
-              const srcInput = getInput(t.rowIndex, sourceLang);
-              return srcInput ? srcInput.value : '';
-            });
+          // Skip if all texts are empty
+          if (texts.every(function(t) { return t.trim() === ''; })) return;
 
-            // Skip if all texts are empty
-            if (texts.every(function(t) { return t.trim() === ''; })) return;
-
-            const response = await Craft.sendActionRequest('POST', autotranslateTextUrl, {
-              data: {
-                texts: texts,
-                sourceLang: sourceLang,
-                targetLang: targetLang,
-                mimeType: 'text/plain'
-              }
-            });
-
-            if (response.data && response.data.success && response.data.translations) {
-              response.data.translations.forEach(function(translated, i) {
-                // Only fill in if source was not empty
-                if (texts[i].trim() === '') return;
-                const targetInput = getInput(group[i].rowIndex, targetLang);
-                if (targetInput) targetInput.value = translated;
-              });
+          var response = await Craft.sendActionRequest('POST', autotranslateTextUrl, {
+            data: {
+              texts: texts,
+              sourceLang: sourceLang,
+              targetLang: targetLang,
+              mimeType: 'text/plain'
             }
           });
 
-          await Promise.all(promises);
-        } catch (err) {
-          Craft.cp.displayError(err.response && err.response.data && err.response.data.error ? err.response.data.error : 'Translation failed.');
-        } finally {
-          setLoading(triggerBtns, false);
-        }
+          if (response.data && response.data.success && response.data.translations) {
+            response.data.translations.forEach(function(translated, i) {
+              if (texts[i].trim() === '') return;
+              var targetInput = getInput(group[i].rowIndex, targetLang);
+              if (targetInput) targetInput.value = translated;
+            });
+          }
+        });
+
+        await Promise.all(promises);
       }
 
-      // Cell button
-      document.querySelectorAll('.js-at-cell').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var rowIndex = btn.getAttribute('data-row-index');
-          var language = btn.getAttribute('data-language');
-          translateCells([{rowIndex: rowIndex, language: language}], [btn]);
-        });
-      });
+      /* ── Modal + translate button ── */
 
-      // Row button
-      document.querySelectorAll('.js-at-row').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var rowIndex = btn.getAttribute('data-row-index');
-          var targets = allLanguages.map(function(lang) {
-            return {rowIndex: rowIndex, language: lang};
-          });
-          translateCells(targets, [btn]);
-        });
-      });
+      translateBtn.addEventListener('click', function() {
+        var targets = getCheckedTargets();
+        if (targets.length === 0) return;
 
-      // Column button
-      document.querySelectorAll('.js-at-column').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var language = btn.getAttribute('data-language');
-          var inputs = document.querySelectorAll('.js-at-input[data-language="' + language + '"]');
-          var targets = [];
-          inputs.forEach(function(input) {
-            targets.push({rowIndex: input.getAttribute('data-row-index'), language: language});
-          });
-          translateCells(targets, [btn]);
-        });
-      });
+        var modalEl = document.createElement('div');
+        modalEl.className = 'modal fitted';
+        modalEl.innerHTML =
+          '<div class="body">' +
+            '<h2>Translate from&hellip;</h2>' +
+            '<div class="field">' +
+              '<label>Source language</label>' +
+              '<div class="select">' +
+                '<select id="at-modal-source-lang">' +
+                  allLanguages.map(function(lang) {
+                    return '<option value="' + lang + '">' + lang + '</option>';
+                  }).join('') +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="buttons right" style="margin-top: 14px;">' +
+              '<button type="button" class="btn" id="at-modal-cancel">Cancel</button>' +
+              '<button type="button" class="btn submit" id="at-modal-confirm">Translate</button>' +
+            '</div>' +
+          '</div>';
 
-      // Entry button
-      document.querySelectorAll('.js-at-entry').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var entryId = btn.getAttribute('data-entry-id');
-          var entryRows = document.querySelectorAll('tr[data-entry-id="' + entryId + '"]');
-          var targets = [];
-          entryRows.forEach(function(tr) {
-            var inputs = tr.querySelectorAll('.js-at-input');
-            inputs.forEach(function(input) {
-              targets.push({
-                rowIndex: input.getAttribute('data-row-index'),
-                language: input.getAttribute('data-language')
-              });
+        var modal = new Garnish.Modal(modalEl, {
+          autoShow: true,
+          closeOtherModals: true,
+          onHide: function() { modal.destroy(); }
+        });
+
+        modalEl.querySelector('#at-modal-cancel').addEventListener('click', function() {
+          modal.hide();
+        });
+
+        modalEl.querySelector('#at-modal-confirm').addEventListener('click', function() {
+          var sourceLang = modalEl.querySelector('#at-modal-source-lang').value;
+          var confirmBtn = modalEl.querySelector('#at-modal-confirm');
+          confirmBtn.classList.add('loading');
+          confirmBtn.disabled = true;
+
+          translateCells(targets, sourceLang)
+            .then(function() {
+              Craft.cp.displayNotice('Translated.');
+              // Uncheck all after successful translation
+              getCellChecks().forEach(function(cb) { cb.checked = false; });
+              document.querySelectorAll('.js-at-row-check, .js-at-col-check, .js-at-entry-check').forEach(function(cb) { cb.checked = false; });
+              updateTranslateBtn();
+            })
+            .catch(function(err) {
+              var msg = err.response && err.response.data && err.response.data.error
+                ? err.response.data.error
+                : 'Translation failed.';
+              Craft.cp.displayError(msg);
+            })
+            .finally(function() {
+              modal.hide();
             });
-          });
-          translateCells(targets, [btn]);
         });
       });
       {% endif %}
