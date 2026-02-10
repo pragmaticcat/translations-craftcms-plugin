@@ -199,11 +199,18 @@ class TranslationsController extends Controller
         }
         unset($row);
 
+        $entryRowCounts = [];
+        foreach ($pageRows as $r) {
+            $id = $r['entry']->id;
+            $entryRowCounts[$id] = ($entryRowCounts[$id] ?? 0) + 1;
+        }
+
         $sections = Craft::$app->entries->getAllSections();
         $fieldOptions = $this->getEntryFieldOptions();
 
         return $this->renderTemplate('pragmatic-translations/entradas', [
             'rows' => $pageRows,
+            'entryRowCounts' => $entryRowCounts,
             'languages' => $languages,
             'languageMap' => $languageMap,
             'sections' => $sections,
