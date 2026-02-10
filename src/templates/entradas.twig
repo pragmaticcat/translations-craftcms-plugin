@@ -72,7 +72,7 @@
           <tr>
             <td>
               <a href="#" class="js-entry-slideout" data-entry-id="{{ row.entry.id }}">{{ row.entry.title }}</a>
-              <div class="light">{{ row.entry.section.name }}</div>
+              <div class="light">{{ row.entry.section.name ?? '' }}</div>
               <input type="hidden" name="entries[{{ rowIndex }}][entryId]" value="{{ row.entry.id }}">
               <input type="hidden" name="entries[{{ rowIndex }}][fieldHandle]" value="{{ row.fieldHandle }}">
             </td>
