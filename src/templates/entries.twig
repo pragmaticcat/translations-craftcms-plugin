@@ -11,29 +11,27 @@
 
 {% block content %}
 
-  <div class="flex" style="gap: 12px; margin-top: 8px; flex-wrap: wrap;">
-    <div class="hud-stat">
-      <div class="label">Total keys</div>
-      <div class="value">{{ total }}</div>
-    </div>
-    <div class="hud-stat">
-      <div class="label">Groups</div>
-      <div class="value">{{ groups|length }}</div>
-    </div>
-    <div class="hud-stat">
-      <div class="label">Languages</div>
-      <div class="value">{{ languages|length }}</div>
-    </div>
-  </div>
-
   <div class="flex" style="margin-top: 12px; gap: 16px; align-items: flex-end;">
-    <form method="get" class="flex" style="gap: 12px; align-items: flex-end;">
-      <input type="hidden" name="group" value="{{ group }}">
+    <form method="get" id="entries-filter" class="flex" style="gap: 12px; align-items: flex-end;">
       <input type="hidden" name="page" value="1">
       <div>
         <label for="q">Search</label>
         <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="Key">
       </div>
+      {% if groups|length > 1 %}
+        <div>
+          <label for="group">Group</label>
+          <div class="select">
+            <select id="group" name="group">
+              {% for groupName in groups %}
+                <option value="{{ groupName }}" {{ groupName == group ? 'selected' : '' }}>{{ groupName }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      {% else %}
+        <input type="hidden" name="group" value="{{ group }}">
+      {% endif %}
       <div>
         <label for="perPage">Per page</label>
         <div class="select">
@@ -47,16 +45,6 @@
       <button class="btn" type="submit">Filter</button>
       <a class="btn" href="{{ url('pragmatic-translations/entries', { group: group, perPage: perPage }) }}">Reset</a>
     </form>
-  </div>
-
-  <div class="tabs" style="margin-top: 16px;">
-    <ul>
-      {% for groupName in groups %}
-        <li>
-          <a class="{{ groupName == group ? 'sel' : '' }}" href="{{ url('pragmatic-translations/entries', { group: groupName, q: search, perPage: perPage }) }}">{{ groupName }}</a>
-        </li>
-      {% endfor %}
-    </ul>
   </div>
 
   <form method="post" accept-charset="UTF-8">
@@ -135,8 +123,90 @@
     </div>
   </div>
 
+  <hr style="margin: 24px 0;">
+
+  <form method="post" accept-charset="UTF-8" style="margin-top: 12px;">
+    {{ csrfInput() }}
+    {{ actionInput('pragmatic-translations/translations/save-groups') }}
+    {{ redirectInput('pragmatic-translations/entries', { group: group, q: search, perPage: perPage }) }}
+
+    <table class="data fullwidth">
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for groupName in groups %}
+          <tr>
+            <td>
+              <input type="hidden" name="groups[{{ loop.index0 }}][original]" value="{{ groupName }}">
+              {% if groupName == 'site' %}
+                <input class="text fullwidth" value="{{ groupName }}" disabled>
+              {% else %}
+                <input class="text fullwidth" name="groups[{{ loop.index0 }}][name]" value="{{ groupName }}">
+              {% endif %}
+            </td>
+            <td>
+              {% if groupName != 'site' %}
+                <label class="checkbox">
+                  <input type="checkbox" name="groups[{{ loop.index0 }}][delete]" value="1">
+                  <span></span>
+                </label>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+
+        {% set newGroupIndex = groups|length %}
+        <tr data-new-group="1">
+          <td>
+            <input type="hidden" name="groups[{{ newGroupIndex }}][original]" value="">
+            <input class="text fullwidth" name="groups[{{ newGroupIndex }}][name]" placeholder="New group">
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="buttons" style="margin-top: 12px;">
+      <button class="btn" id="add-group-row" type="button">Add Group</button>
+      <button class="btn submit" type="submit">Save Groups</button>
+    </div>
+  </form>
+
   {% js %}
     (function() {
+      const filterForm = document.getElementById('entries-filter');
+      const searchInput = document.getElementById('q');
+      const groupSelect = document.getElementById('group');
+      const perPageSelect = document.getElementById('perPage');
+
+      if (filterForm) {
+        let searchTimer = null;
+        if (searchInput) {
+          searchInput.addEventListener('input', function() {
+            if (searchTimer) {
+              clearTimeout(searchTimer);
+            }
+            searchTimer = setTimeout(function() {
+              filterForm.submit();
+            }, 300);
+          });
+        }
+        if (groupSelect) {
+          groupSelect.addEventListener('change', function() {
+            filterForm.submit();
+          });
+        }
+        if (perPageSelect) {
+          perPageSelect.addEventListener('change', function() {
+            filterForm.submit();
+          });
+        }
+      }
+
       const translationsTable = document.getElementById('translations-table');
       const addTranslationButton = document.getElementById('add-row');
       if (translationsTable && addTranslationButton) {
@@ -153,6 +223,30 @@
             const name = input.getAttribute('name');
             if (name) {
               input.setAttribute('name', name.replace(/translations\[\d+\]/, 'translations[' + newIndex + ']'));
+            }
+            input.value = '';
+          });
+
+          body.appendChild(clone);
+        });
+      }
+
+      const addGroupButton = document.getElementById('add-group-row');
+      if (addGroupButton) {
+        addGroupButton.addEventListener('click', function() {
+          const form = addGroupButton.closest('form');
+          const body = form ? form.querySelector('tbody') : null;
+          const template = body ? body.querySelector('tr[data-new-group="1"]') : null;
+          if (!template) return;
+
+          const newIndex = body.querySelectorAll('tr').length;
+          const clone = template.cloneNode(true);
+          clone.removeAttribute('data-new-group');
+
+          clone.querySelectorAll('input').forEach(function(input) {
+            const name = input.getAttribute('name');
+            if (name) {
+              input.setAttribute('name', name.replace(/groups\[\d+\]/, 'groups[' + newIndex + ']'));
             }
             input.value = '';
           });
