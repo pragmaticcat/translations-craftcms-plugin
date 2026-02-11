@@ -167,14 +167,14 @@ class PragmaticTranslations extends Plugin
 
                         $view->registerJsWithVars(
                             fn($btnId, $cId, $eId, $fHandle) => <<<JS
-$('#' + $btnId).on('activate', function() {
-    var container = document.getElementById($cId);
-    if (window.PragmaticTranslations && window.PragmaticTranslations.openModal) {
-        window.PragmaticTranslations.openModal(container, $eId, $fHandle);
-    }
-});
-JS,
-                            [
+                                $('#' + $btnId).on('activate', function() {
+                                    var container = document.getElementById($cId);
+                                    if (window.PragmaticTranslations && window.PragmaticTranslations.openModal) {
+                                        window.PragmaticTranslations.openModal(container, $eId, $fHandle);
+                                    }
+                                });
+                                JS,
+                                                            [
                                 $view->namespaceInputId($itemId),
                                 $containerId,
                                 $element->id,
@@ -263,7 +263,8 @@ JS,
     public function getCpNavItem(): array
     {
         $item = parent::getCpNavItem();
-        $item['label'] = 'Pragmatic';
+        $item['label'] = 'Translations';
+        $item['navLabel'] = 'Pragmatic';
         $item['subnav'] = [
             'translations' => [
                 'label' => 'Translations',
