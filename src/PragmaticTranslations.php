@@ -122,6 +122,11 @@ class PragmaticTranslations extends Plugin
                     'label' => 'Translations',
                     'url' => 'pragmatic-translations',
                 ];
+
+                $path = Craft::$app->getRequest()->getPathInfo();
+                if ($path === 'pragmatic-translations' || str_starts_with($path, 'pragmatic-translations/')) {
+                    $event->navItems[$groupKey]['url'] = 'pragmatic-translations';
+                }
             }
         );
 
