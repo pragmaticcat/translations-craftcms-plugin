@@ -5,10 +5,10 @@
 {% set selectedTab = craft.app.request.getSegment(2) %}
 
 {% set tabs = {
-    'static': { label: "Estáticas", url: url('pragmatic-translations/static') },
-    'entries': { label: "Entradas", url: url('pragmatic-translations/entries') },
-    'import-export': { label: "Importar/exportar", url: url('pragmatic-translations/import-export') },
-    'options': { label: "Opciones", url: url('pragmatic-translations/options') },
+    'static': { label: "Static"|t('pragmatic-translations'), url: url('pragmatic-translations/static') },
+    'entries': { label: "Entries"|t('pragmatic-translations'), url: url('pragmatic-translations/entries') },
+    'import-export': { label: "Import/export"|t('pragmatic-translations'), url: url('pragmatic-translations/import-export') },
+    'options': { label: "Options"|t('pragmatic-translations'), url: url('pragmatic-translations/options') },
 } %}
 
 {% block content %}

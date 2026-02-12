@@ -1,12 +1,12 @@
 {% extends "pragmatic-translations/_layout" %}
 
-{% set title = "Estáticas"|t('pragmatic-translations') %}
+{% set title = "Static"|t('pragmatic-translations') %}
 
 {% set selectedTab = 'static' %}
 
 {% set crumbs = [
     { label: "Translations"|t('pragmatic-translations'), url: url('pragmatic-translations') },
-    { label: "Estáticas"|t('pragmatic-translations'), url: url('pragmatic-translations/static') },
+    { label: "Static"|t('pragmatic-translations'), url: url('pragmatic-translations/static') },
 ] %}
 
 {% block content %}
@@ -15,12 +15,12 @@
       <form method="get" id="entries-filter" class="flex" style="gap: 12px; align-items: flex-end;">
         <input type="hidden" name="page" value="1">
         <div>
-          <label for="q">Search</label>
-          <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="Key">
+          <label for="q">{{ "Search"|t('pragmatic-translations') }}</label>
+          <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="{{ "Key"|t('pragmatic-translations') }}">
         </div>
         {% if groups|length > 1 %}
           <div>
-            <label for="group">Group</label>
+            <label for="group">{{ "Group"|t('pragmatic-translations') }}</label>
             <div class="select">
               <select id="group" name="group">
                 {% for groupName in groups %}
@@ -33,7 +33,7 @@
           <input type="hidden" name="group" value="{{ group }}">
         {% endif %}
         <div>
-          <label for="perPage">Per page</label>
+          <label for="perPage">{{ "Per page"|t('pragmatic-translations') }}</label>
           <div class="select">
             <select id="perPage" name="perPage">
               {% for option in [50, 100, 250] %}
@@ -44,8 +44,8 @@
         </div>
       </form>
       <div class="buttons">
-        <button class="btn" id="add-row" type="button">Add Row</button>
-        <button class="btn submit" type="submit">Save</button>
+        <button class="btn" id="add-row" type="button">{{ "Add Row"|t('pragmatic-translations') }}</button>
+        <button class="btn submit" type="submit">{{ "Save"|t('pragmatic-translations') }}</button>
       </div>
   </div>
 
@@ -59,11 +59,11 @@
     <table class="data fullwidth" id="translations-table" style="margin-top: 16px;">
       <thead>
         <tr>
-          <th>Key</th>
+          <th>{{ "Key"|t('pragmatic-translations') }}</th>
           {% for language in languages %}
             <th>{{ language }}</th>
           {% endfor %}
-          <th>Delete</th>
+          <th>{{ "Delete"|t('pragmatic-translations') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -97,7 +97,7 @@
         {% set newIndex = translations|length %}
         <tr data-new-row="1">
           <td>
-            <input class="text fullwidth" name="translations[{{ newIndex }}][key]" placeholder="New key">
+            <input class="text fullwidth" name="translations[{{ newIndex }}][key]" placeholder="{{ "New key"|t('pragmatic-translations') }}">
             <input type="hidden" name="translations[{{ newIndex }}][group]" value="{{ group }}">
           </td>
           {% for language in languages %}
@@ -113,13 +113,13 @@
   </form>
 
   <div class="flex justify-between align-center" style="margin-top: 16px;">
-    <div>{{ total }} total</div>
+    <div>{{ total }} {{ "total"|t('pragmatic-translations') }}</div>
     <div class="flex" style="gap: 8px; align-items: center;">
       {% set prevPage = page > 1 ? page - 1 : 1 %}
       {% set nextPage = page < totalPages ? page + 1 : totalPages %}
-      <a class="btn {{ page == 1 ? 'disabled' : '' }}" href="{{ url('pragmatic-translations/static', { group: group, q: search, perPage: perPage, page: prevPage }) }}">Prev</a>
-      <div>Page {{ page }} / {{ totalPages }}</div>
-      <a class="btn {{ page == totalPages ? 'disabled' : '' }}" href="{{ url('pragmatic-translations/static', { group: group, q: search, perPage: perPage, page: nextPage }) }}">Next</a>
+      <a class="btn {{ page == 1 ? 'disabled' : '' }}" href="{{ url('pragmatic-translations/static', { group: group, q: search, perPage: perPage, page: prevPage }) }}">{{ "Prev"|t('pragmatic-translations') }}</a>
+      <div>{{ "Page"|t('pragmatic-translations') }} {{ page }} / {{ totalPages }}</div>
+      <a class="btn {{ page == totalPages ? 'disabled' : '' }}" href="{{ url('pragmatic-translations/static', { group: group, q: search, perPage: perPage, page: nextPage }) }}">{{ "Next"|t('pragmatic-translations') }}</a>
     </div>
   </div>
 
@@ -133,8 +133,8 @@
     <table class="data fullwidth">
       <thead>
         <tr>
-          <th>Group</th>
-          <th>Delete</th>
+          <th>{{ "Group"|t('pragmatic-translations') }}</th>
+          <th>{{ "Delete"|t('pragmatic-translations') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -163,7 +163,7 @@
         <tr data-new-group="1">
           <td>
             <input type="hidden" name="groups[{{ newGroupIndex }}][original]" value="">
-            <input class="text fullwidth" name="groups[{{ newGroupIndex }}][name]" placeholder="New group">
+            <input class="text fullwidth" name="groups[{{ newGroupIndex }}][name]" placeholder="{{ "New group"|t('pragmatic-translations') }}">
           </td>
           <td></td>
         </tr>
@@ -171,8 +171,8 @@
     </table>
 
     <div class="buttons" style="margin-top: 12px;">
-      <button class="btn" id="add-group-row" type="button">Add Group</button>
-      <button class="btn submit" type="submit">Save Groups</button>
+      <button class="btn" id="add-group-row" type="button">{{ "Add Group"|t('pragmatic-translations') }}</button>
+      <button class="btn submit" type="submit">{{ "Save Groups"|t('pragmatic-translations') }}</button>
     </div>
   </form>
 

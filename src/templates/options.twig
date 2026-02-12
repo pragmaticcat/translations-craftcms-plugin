@@ -1,11 +1,11 @@
 {% extends "pragmatic-translations/_layout" %}
 
-{% set title = "Opciones"|t('pragmatic-translations') %}
+{% set title = "Options"|t('pragmatic-translations') %}
 {% set selectedTab = 'options' %}
 
 {% set crumbs = [
     { label: "Translations"|t('pragmatic-translations'), url: url('pragmatic-translations') },
-    { label: "Opciones"|t('pragmatic-translations'), url: url('pragmatic-translations/options') },
+    { label: "Options"|t('pragmatic-translations'), url: url('pragmatic-translations/options') },
 ] %}
 
 {% import "_includes/forms" as forms %}
@@ -22,15 +22,15 @@
     {% endif %}
 
     {{ forms.lightswitchField({
-      label: "Autotraducir campos"|t('pragmatic-translations'),
-      instructions: "Habilita o deshabilita la opción de traducir campos desde otro sitio."|t('pragmatic-translations'),
+      label: "Auto-translate fields"|t('pragmatic-translations'),
+      instructions: "Enable or disable the option to translate fields from another site."|t('pragmatic-translations'),
       name: 'settings[enableAutotranslate]',
       on: settings.enableAutotranslate,
       disabled: not autotranslateAvailable
     }) }}
 
     <div class="buttons">
-      <button class="btn submit" type="submit">Save</button>
+      <button class="btn submit" type="submit">{{ "Save"|t('pragmatic-translations') }}</button>
     </div>
   </form>
 {% endblock %}

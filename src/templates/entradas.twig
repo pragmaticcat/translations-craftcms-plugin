@@ -1,11 +1,11 @@
 {% extends "pragmatic-translations/_layout" %}
 
-{% set title = "Entradas"|t('pragmatic-translations') %}
+{% set title = "Entries"|t('pragmatic-translations') %}
 {% set selectedTab = 'entries' %}
 
 {% set crumbs = [
     { label: "Translations"|t('pragmatic-translations'), url: url('pragmatic-translations') },
-    { label: "Entradas"|t('pragmatic-translations'), url: url('pragmatic-translations/entries') },
+    { label: "Entries"|t('pragmatic-translations'), url: url('pragmatic-translations/entries') },
 ] %}
 
 {% block content %}
@@ -19,14 +19,14 @@
     <form method="get" id="entries-filter" class="flex" style="gap: 12px; align-items: flex-end;">
       <input type="hidden" name="page" value="1">
       <div>
-        <label for="q">Search</label>
-        <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="Entry title">
+        <label for="q">{{ "Search"|t('pragmatic-translations') }}</label>
+        <input class="text" type="text" id="q" name="q" value="{{ search }}" placeholder="{{ "Entry title"|t('pragmatic-translations') }}">
       </div>
       <div>
-        <label for="section">Section</label>
+        <label for="section">{{ "Section"|t('pragmatic-translations') }}</label>
         <div class="select">
           <select id="section" name="section">
-            <option value="">All</option>
+            <option value="">{{ "All"|t('pragmatic-translations') }}</option>
             {% for section in sections %}
               <option value="{{ section.id }}" {{ section.id == sectionId ? 'selected' : '' }}>{{ section.name }}</option>
             {% endfor %}
@@ -34,7 +34,7 @@
         </div>
       </div>
       <div>
-        <label for="field">Field</label>
+        <label for="field">{{ "Field"|t('pragmatic-translations') }}</label>
         <div class="select">
           <select id="field" name="field">
             {% for option in fieldOptions %}
@@ -44,7 +44,7 @@
         </div>
       </div>
       <div>
-        <label for="perPage">Per page</label>
+        <label for="perPage">{{ "Per page"|t('pragmatic-translations') }}</label>
         <div class="select">
           <select id="perPage" name="perPage">
             {% for option in [50, 100, 250] %}
@@ -55,7 +55,7 @@
       </div>
     </form>
     {% if autotranslateAvailable %}
-      <button type="button" id="at-translate-selected" class="btn submit" disabled>Translate selected</button>
+      <button type="button" id="at-translate-selected" class="btn submit" disabled>{{ "Translate selected"|t('pragmatic-translations') }}</button>
     {% endif %}
   </div>
 
@@ -67,8 +67,8 @@
     <table class="data fullwidth" style="margin-top: 16px;">
       <thead>
         <tr>
-          <th>Entry</th>
-          <th>Field</th>
+          <th>{{ "Entry"|t('pragmatic-translations') }}</th>
+          <th>{{ "Field"|t('pragmatic-translations') }}</th>
           {% for language in languages %}
             <th>
               {{ language }}
@@ -77,7 +77,7 @@
               {% endif %}
             </th>
           {% endfor %}
-          <th>Action</th>
+          <th>{{ "Action"|t('pragmatic-translations') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -90,7 +90,7 @@
             {% if isFirstOfGroup %}
               <td rowspan="{{ entryRowCounts[entryId] }}" style="vertical-align: top;">
                 <a href="#" class="js-entry-slideout" data-entry-id="{{ entryId }}">{{ row.entry.title|default('Entry #' ~ entryId) }}</a>
-                <div class="light">{{ row.entry.section.name ?? row.entry.type.name ?? 'No section or type' }}</div>
+                <div class="light">{{ row.entry.section.name ?? row.entry.type.name ?? "No section or type"|t('pragmatic-translations') }}</div>
               </td>
             {% endif %}
             <td>
@@ -110,7 +110,7 @@
               </td>
             {% endfor %}
             <td style="white-space: nowrap;">
-              <button class="btn submit" type="submit" name="saveRow" value="{{ rowIndex }}">Save</button>
+              <button class="btn submit" type="submit" name="saveRow" value="{{ rowIndex }}">{{ "Save"|t('pragmatic-translations') }}</button>
             </td>
           </tr>
         {% endfor %}
@@ -119,20 +119,20 @@
   </form>
 
   <div class="flex justify-between align-center" style="margin-top: 16px;">
-    <div>{{ total }} total</div>
+    <div>{{ total }} {{ "total"|t('pragmatic-translations') }}</div>
     <div class="flex" style="gap: 8px; align-items: center;">
       {% set prevPage = page > 1 ? page - 1 : 1 %}
       {% set nextPage = page < totalPages ? page + 1 : totalPages %}
       {% if page == 1 %}
-        <span class="btn disabled">Prev</span>
+        <span class="btn disabled">{{ "Prev"|t('pragmatic-translations') }}</span>
       {% else %}
-        <a class="btn" href="{{ url('pragmatic-translations/entries', { q: search, perPage: perPage, page: prevPage, section: sectionId, field: fieldFilter }) }}">Prev</a>
+        <a class="btn" href="{{ url('pragmatic-translations/entries', { q: search, perPage: perPage, page: prevPage, section: sectionId, field: fieldFilter }) }}">{{ "Prev"|t('pragmatic-translations') }}</a>
       {% endif %}
-      <div>Page {{ page }} / {{ totalPages }}</div>
+      <div>{{ "Page"|t('pragmatic-translations') }} {{ page }} / {{ totalPages }}</div>
       {% if page == totalPages %}
-        <span class="btn disabled">Next</span>
+        <span class="btn disabled">{{ "Next"|t('pragmatic-translations') }}</span>
       {% else %}
-        <a class="btn" href="{{ url('pragmatic-translations/entries', { q: search, perPage: perPage, page: nextPage, section: sectionId, field: fieldFilter }) }}">Next</a>
+        <a class="btn" href="{{ url('pragmatic-translations/entries', { q: search, perPage: perPage, page: nextPage, section: sectionId, field: fieldFilter }) }}">{{ "Next"|t('pragmatic-translations') }}</a>
       {% endif %}
     </div>
   </div>
@@ -287,9 +287,9 @@
         modalEl.className = 'modal fitted';
         modalEl.innerHTML =
           '<div class="body">' +
-            '<h2>Translate from&hellip;</h2>' +
+            '<h2>{{ "Translate from…"|t('pragmatic-translations')|e('js') }}</h2>' +
             '<div class="field">' +
-              '<label>Source language</label>' +
+              '<label>{{ "Source language"|t('pragmatic-translations')|e('js') }}</label>' +
               '<div class="select">' +
                 '<select id="at-modal-source-lang">' +
                   allLanguages.map(function(lang) {
@@ -299,8 +299,8 @@
               '</div>' +
             '</div>' +
             '<div class="buttons right" style="margin-top: 14px;">' +
-              '<button type="button" class="btn" id="at-modal-cancel">Cancel</button>' +
-              '<button type="button" class="btn submit" id="at-modal-confirm">Translate</button>' +
+              '<button type="button" class="btn" id="at-modal-cancel">{{ "Cancel"|t('pragmatic-translations')|e('js') }}</button>' +
+              '<button type="button" class="btn submit" id="at-modal-confirm">{{ "Translate"|t('pragmatic-translations')|e('js') }}</button>' +
             '</div>' +
           '</div>';
 
@@ -322,7 +322,7 @@
 
           translateCells(targets, sourceLang)
             .then(function() {
-              Craft.cp.displayNotice('Translated.');
+              Craft.cp.displayNotice('{{ "Translated."|t('pragmatic-translations')|e('js') }}');
               // Uncheck all after successful translation
               getCellChecks().forEach(function(cb) { cb.checked = false; });
               document.querySelectorAll('.js-at-col-check').forEach(function(cb) { cb.checked = false; });
@@ -331,7 +331,7 @@
             .catch(function(err) {
               var msg = err.response && err.response.data && err.response.data.error
                 ? err.response.data.error
-                : 'Translation failed.';
+                : '{{ "Translation failed."|t('pragmatic-translations')|e('js') }}';
               Craft.cp.displayError(msg);
             })
             .finally(function() {

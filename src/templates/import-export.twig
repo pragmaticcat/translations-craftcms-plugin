@@ -1,42 +1,42 @@
 {% extends "pragmatic-translations/_layout" %}
 
-{% set title = "Importar/exportar"|t('pragmatic-translations') %}
+{% set title = "Import/export"|t('pragmatic-translations') %}
 
 {% set selectedTab = 'import-export' %}
 
 {% set crumbs = [
     { label: "Translations"|t('pragmatic-translations'), url: url('pragmatic-translations') },
-    { label: "Importar/exportar"|t('pragmatic-translations'), url: url('pragmatic-translations/import-export') },
+    { label: "Import/export"|t('pragmatic-translations'), url: url('pragmatic-translations/import-export') },
 ] %}
 
 {% block content %}
 
   <div class="readable" style="margin-top: 12px; padding: 12px; background: #f0f4f8; border-left: 4px solid #7b8794; border-radius: 4px;">
-    <p style="margin: 0;">La importaci&oacute;n y exportaci&oacute;n solo afectan a las <strong>traducciones est&aacute;ticas</strong>. Las traducciones de entries no se incluyen.</p>
+    <p style="margin: 0;">{{ "Import and export only affect <strong>static translations</strong>. Entry translations are not included."|t('pragmatic-translations')|raw }}</p>
   </div>
 
   <div style="margin-top: 12px;">
-    <h2>Exportar</h2>
-    <p class="light">Descarga todas las traducciones en el formato que necesites.</p>
+    <h2>{{ "Export"|t('pragmatic-translations') }}</h2>
+    <p class="light">{{ "Download all translations in the format you need."|t('pragmatic-translations') }}</p>
     <div class="btngroup" style="margin-top: 8px;">
-      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'csv' }) }}">Export CSV</a>
-      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'json' }) }}">Export JSON</a>
-      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'php' }) }}">Export PHP</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'csv' }) }}">{{ "Export CSV"|t('pragmatic-translations') }}</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'json' }) }}">{{ "Export JSON"|t('pragmatic-translations') }}</a>
+      <a class="btn" href="{{ url('pragmatic-translations/export', { format: 'php' }) }}">{{ "Export PHP"|t('pragmatic-translations') }}</a>
     </div>
   </div>
 
   <hr style="margin: 24px 0;">
 
   <div>
-    <h2>Importar</h2>
-    <p class="light">Sube un archivo CSV, JSON o ZIP de PHP para actualizar las traducciones.</p>
+    <h2>{{ "Import"|t('pragmatic-translations') }}</h2>
+    <p class="light">{{ "Upload a CSV, JSON or PHP ZIP file to update translations."|t('pragmatic-translations') }}</p>
     <form method="post" enctype="multipart/form-data" accept-charset="UTF-8" style="margin-top: 8px;">
       {{ csrfInput() }}
       {{ actionInput('pragmatic-translations/translations/import') }}
       {{ redirectInput('pragmatic-translations/import-export', { group: group, q: search, perPage: perPage }) }}
       <div class="flex" style="gap: 8px; align-items: flex-end;">
         <div>
-          <label for="format">Formato</label>
+          <label for="format">{{ "Format"|t('pragmatic-translations') }}</label>
           <div class="select">
             <select id="format" name="format">
               <option value="csv">CSV</option>
@@ -46,7 +46,7 @@
           </div>
         </div>
         <input type="file" name="file" required>
-        <button class="btn" type="submit">Subir</button>
+        <button class="btn" type="submit">{{ "Upload"|t('pragmatic-translations') }}</button>
       </div>
     </form>
   </div>
