@@ -1,5 +1,5 @@
 {
-  "name": "pragmatic/pragmatic-translations",
+  "name": "pragmatic/translations-craftcms-plugin",
   "description": "Manage static translations in Craft CMS",
   "type": "craft-plugin",
   "license": "MIT",
@@ -22,12 +22,12 @@
     "email": "oriolnoya@pragmatic.cat"
   },
   "extra": {
-    "handle": "pragmatic-translations",
+    "handle": "pragmatic-translations-craftcms-plugin",
     "class": "pragmatic\\translations\\PragmaticTranslations",
     "name": "Pragmatic Translations",
     "developer": "Pragmatic",
     "developerUrl": "https://www.pragmatic.cat",
-    "documentationUrl": "https://github.com/pragmaticcat/pragmatic-translations/blob/main/README.md",
+    "documentationUrl": "https://github.com/pragmaticcat/translations-craftcms-plugin/blob/main/README.md",
     "hasSettings": false,
     "hasCpSection": true
   }
