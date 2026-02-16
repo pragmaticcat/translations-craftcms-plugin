@@ -11,7 +11,7 @@
 
 {% block content %}
 
-  <div class="flex flex-row justify-between align-center" style="margin-top: 12px; gap: 16px;">
+  <div class="flex flex-row align-center" style="margin-top: 12px; gap: 16px; justify-content: between; width:100%;">
       <div class="flex align-center">
         <form method="get" id="entries-filter" class="flex" style="gap: 12px; align-items: flex-end;">
           <input type="hidden" name="page" value="1">
@@ -45,7 +45,7 @@
             </div>
           </div>
         </form>
-        <div class="buttons">
+        <div class="buttons" style="margin-block:0;">
           <button class="btn" id="add-row" type="button">{{ "Add Row"|t('pragmatic-translations') }}</button>
           <button class="btn submit" type="submit">{{ "Save"|t('pragmatic-translations') }}</button>
         </div>
@@ -136,7 +136,7 @@
 
   </form>
 
-  <div class="flex flex-row justify-between align-center" style="margin-top: 16px;">
+  <div class="flex flex-row justify-between align-center" style="margin-top: 16px; justify-content: between; width:100%;">
     <div class="flex align-center">
       <div>{{ total }} {{ "total"|t('pragmatic-translations') }}</div>
       <div class="flex" style="gap: 8px; align-items: center;">
