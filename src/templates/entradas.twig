@@ -21,7 +21,7 @@
         {% for section in sections %}
           <li>
             <a class="{{ section.id == sectionId ? 'sel' : '' }}" href="{{ url('pragmatic-translations/entries', { site: selectedSite.handle, section: section.id, field: fieldFilter }) }}">
-              {{ section.name }} <span class="light">({{ section.count }})</span>
+              {{ section.name }} <span class="light ms-2">({{ section.count }})</span>
             </a>
           </li>
         {% endfor %}

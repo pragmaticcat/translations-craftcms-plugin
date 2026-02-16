@@ -98,6 +98,9 @@ class TranslationsController extends Controller
         $fieldFilter = (string)$request->getParam('field', '');
         $selectedSite = Cp::requestedSite() ?? Craft::$app->getSites()->getPrimarySite();
         $selectedSiteId = (int)$selectedSite->id;
+        if ($sectionId && !$this->isSectionAvailableForSite($sectionId, $selectedSiteId)) {
+            $sectionId = 0;
+        }
 
         $sites = Craft::$app->getSites()->getAllSites();
         $languages = $this->getLanguages($sites);
@@ -195,7 +198,7 @@ class TranslationsController extends Controller
             $entryRowCounts[$id] = ($entryRowCounts[$id] ?? 0) + 1;
         }
 
-        $sections = $this->getEntrySectionsForSite($selectedSiteId, $sectionId, $fieldFilter);
+        $sections = $this->getEntrySectionsForSite($selectedSiteId, $fieldFilter);
         $fieldOptions = $this->getEntryFieldOptions();
 
         $settings = PragmaticTranslations::$plugin->getSettings();
@@ -749,7 +752,7 @@ class TranslationsController extends Controller
         return false;
     }
 
-    private function getEntrySectionsForSite(int $siteId, int $selectedSectionId = 0, string $fieldFilter = ''): array
+    private function getEntrySectionsForSite(int $siteId, string $fieldFilter = ''): array
     {
         $sectionCounts = [];
         $entries = Entry::find()
@@ -773,22 +776,47 @@ class TranslationsController extends Controller
 
         $rows = [];
         foreach (Craft::$app->entries->getAllSections() as $section) {
-            $id = (int)$section->id;
-            if (isset($sectionCounts[$id])) {
-                $rows[$id] = ['id' => $id, 'name' => $section->name, 'count' => $sectionCounts[$id]];
+            if (!$this->isSectionActiveForSite($section, $siteId)) {
+                continue;
             }
-        }
 
-        if ($selectedSectionId && !isset($rows[$selectedSectionId])) {
-            $selectedSection = Craft::$app->entries->getSectionById($selectedSectionId);
-            if ($selectedSection) {
-                $rows[$selectedSectionId] = ['id' => $selectedSectionId, 'name' => $selectedSection->name, 'count' => 0];
-            }
+            $id = (int)$section->id;
+            $rows[$id] = ['id' => $id, 'name' => $section->name, 'count' => $sectionCounts[$id] ?? 0];
         }
 
         usort($rows, fn($a, $b) => $b['count'] <=> $a['count'] ?: strcmp($a['name'], $b['name']));
 
         return array_values($rows);
+    }
+
+    private function isSectionAvailableForSite(int $sectionId, int $siteId): bool
+    {
+        $section = Craft::$app->entries->getSectionById($sectionId);
+        return $this->isSectionActiveForSite($section, $siteId);
+    }
+
+    private function isSectionActiveForSite(mixed $section, int $siteId): bool
+    {
+        if (!$section || !method_exists($section, 'getSiteSettings')) {
+            return false;
+        }
+
+        $allSettings = $section->getSiteSettings();
+        if (!is_array($allSettings) || empty($allSettings)) {
+            return false;
+        }
+
+        if (isset($allSettings[$siteId])) {
+            return true;
+        }
+
+        foreach ($allSettings as $setting) {
+            if ((int)($setting->siteId ?? 0) === $siteId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function expandLanguageValuesToSites(array $items, array $languageMap): array
