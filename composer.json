@@ -22,7 +22,7 @@
     "email": "oriolnoya@pragmatic.cat"
   },
   "extra": {
-    "handle": "pragmatic-translations-craftcms-plugin",
+    "handle": "pragmatic-translations",
     "class": "pragmatic\\translations\\PragmaticTranslations",
     "name": "Pragmatic Translations",
     "developer": "Pragmatic",
